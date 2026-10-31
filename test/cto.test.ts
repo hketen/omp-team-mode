@@ -22,17 +22,21 @@ test("sessionChoice takes the latest own entry on the branch", () => {
 	expect(sessionChoice([own(false), own(true), { type: "custom", customType: "other", data: { enabled: false } }])).toBe(true);
 });
 
-test("default file read/write", async () => {
+test("default file read/write merges fields", async () => {
 	const root = await mkdtemp(join(tmpdir(), "omp-team-mode-"));
 	try {
 		const agentDir = join(root, "profiles", "x", "agent"); // does not exist yet
-		expect(await readDefault(agentDir)).toBeUndefined();
-		await writeDefault(agentDir, true);
-		expect(await readDefault(agentDir)).toBe(true);
-		await writeDefault(agentDir, false);
-		expect(await readDefault(agentDir)).toBe(false);
+		expect(await readDefault(agentDir)).toEqual({});
+		await writeDefault(agentDir, { enabled: true });
+		expect(await readDefault(agentDir)).toEqual({ enabled: true });
+		await writeDefault(agentDir, { test: "full" });
+		expect(await readDefault(agentDir)).toEqual({ enabled: true, test: "full" });
+		await writeDefault(agentDir, { enabled: false });
+		expect(await readDefault(agentDir)).toEqual({ enabled: false, test: "full" });
+		await Bun.write(join(agentDir, "team-mode.json"), `{"enabled":1,"test":"slow"}`);
+		expect(await readDefault(agentDir)).toEqual({});
 		await Bun.write(join(agentDir, "team-mode.json"), "not json");
-		expect(await readDefault(agentDir)).toBeUndefined();
+		expect(await readDefault(agentDir)).toEqual({});
 	} finally {
 		await rm(root, { recursive: true, force: true });
 	}

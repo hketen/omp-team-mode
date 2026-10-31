@@ -11,7 +11,7 @@
 			"name": "team-mode",
 			"source": "./",
 			"description": "/cto toggles a CTO mode that delegates work to developer and reviewer subagents",
-			"version": "0.1.0",
+			"version": "0.2.0",
 			"license": "MIT",
 			"category": "development",
 			"homepage": "https://github.com/hketen/omp-team-mode",

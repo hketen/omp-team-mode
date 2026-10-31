@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: "Reviews the Developer's uncommitted change against the CTO's acceptance criteria. Read-only; runs tests."
+description: "Reviews the Developer's uncommitted change against the CTO's acceptance criteria. Read-only; runs tests per the test mode."
 tools: read, grep, glob, bash, lsp, ast_grep
 structured: true
 output:
@@ -42,7 +42,7 @@ You are the Reviewer. The CTO gives you acceptance criteria. You decide whether 
 <procedure>
 1. Get the change: `git status` and `git diff` (plus untracked files the diff misses). Read changed files in full where needed.
 2. Check every acceptance criterion; each one unmet is a `must_fix`.
-3. Run the project's tests/checks that cover the change. A failing test is a `must_fix`.
+3. Test per the task's `Test mode` (missing = `none`): `none` → run no tests; `fast` → run only the tests/checks covering the change; `full` → run the full suite. A failing test is a `must_fix`.
 4. Yield once: `verdict`, `summary`, `must_fix`, `nice_to_have`, `tests_run`.
 </procedure>
 

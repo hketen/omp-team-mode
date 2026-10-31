@@ -50,6 +50,8 @@ bun test
 | `/cto off` | Turn CTO mode off for the current session |
 | `/cto default on` | New sessions in this profile start with CTO mode on |
 | `/cto default off` | New sessions in this profile start with CTO mode off |
+| `/cto test none\|fast\|full` | Use this test mode for the next prompt only, then return to the default |
+| `/cto default test none\|fast\|full` | Default test mode for this profile (applies at once) |
 
 Anything else prints the usage.
 
@@ -64,6 +66,18 @@ The effective state is resolved in this order:
 The profile default is read when a session opens (start, `/new`, resume). Changing it does not affect sessions that are already open.
 
 CTO rules are injected only into the main session. Subagents, including `developer` and `reviewer`, never get them.
+
+## Test mode
+
+Controls how much the `developer` and `reviewer` test while CTO mode is on. The CTO passes the mode in every task.
+
+| Mode | Behavior |
+| --- | --- |
+| `none` (default) | Tests are written, but not run. |
+| `fast` | Only the tests/checks that cover the change run. |
+| `full` | The full test suite and checks run. |
+
+Example: `/cto default test full` once; for a small text change, `/cto test fast` before that prompt.
 
 ## ⚠️ Agent override
 
