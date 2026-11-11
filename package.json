@@ -1,6 +1,6 @@
 {
 	"name": "omp-team-mode",
-	"version": "0.2.0",
+	"version": "0.4.0",
 	"description": "Opt-in CTO team mode for omp: /cto turns the main agent into a CTO that delegates to developer and reviewer subagents.",
 	"license": "MIT",
 	"author": "Hakan Keten",

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
 
 export const STATE_ENTRY = "omp-team-mode.state";
+export const STATUS_KEY = "omp-team-mode";
 export const DEFAULT_FILE = "team-mode.json";
 export const TEST_MODES = ["none", "fast", "full"] as const;
 const USAGE = "Usage: /cto [on|off|test <none|fast|full>|default on|default off|default test <none|fast|full>]";
@@ -60,13 +61,19 @@ export default async function teamMode(pi: ExtensionAPI) {
 		const { enabled, source } = effective(session, def.enabled);
 		return `${enabled ? "on" : "off"} (source: ${source}), test mode: ${testMode()}${next ? " (next prompt only)" : ""}`;
 	};
+	const sync = (ctx: ExtensionContext) => {
+		// Subagents rebind this factory; only the main session shows the footer status.
+		if (ctx.agent.kind === "main") ctx.ui.setStatus(STATUS_KEY, effective(session, def.enabled).enabled ? "CTO" : undefined);
+	};
 
 	const open = async (_event: unknown, ctx: ExtensionContext) => {
 		def = await readDefault(pi.pi.getAgentDir());
 		session = sessionChoice(ctx.sessionManager.getBranch());
+		sync(ctx);
 	};
 	const navigate = async (_event: unknown, ctx: ExtensionContext) => {
 		session = sessionChoice(ctx.sessionManager.getBranch());
+		sync(ctx);
 	};
 	pi.on("session_start", open);
 	pi.on("session_switch", open);
@@ -74,7 +81,7 @@ export default async function teamMode(pi: ExtensionAPI) {
 	pi.on("session_tree", navigate);
 
 	pi.on("before_agent_start", async (event, ctx) => {
-		// Subagents (developer, reviewer, ...) rebind this factory; only the main session is the CTO.
+		// Subagents (team-developer, team-reviewer, ...) rebind this factory; only the main session is the CTO.
 		if (ctx.agent.kind !== "main") return;
 		const test = testMode();
 		next = undefined;
@@ -92,6 +99,7 @@ export default async function teamMode(pi: ExtensionAPI) {
 			} else if (words.length === 1 && (a === "on" || a === "off")) {
 				session = a === "on";
 				pi.appendEntry(STATE_ENTRY, { enabled: session });
+				sync(ctx);
 				ctx.ui.notify(`CTO mode ${a} for this session`, "info");
 			} else if (words.length === 2 && a === "test" && isTestMode(b)) {
 				next = b;
